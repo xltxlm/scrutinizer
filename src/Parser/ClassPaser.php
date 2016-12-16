@@ -134,7 +134,7 @@ final class ClassPaser extends Template
                 $TypeModel->setIsarray($isArray);
                 $type = substr($type, 0, -2);
             }
-            $TypeModel->setTypeName($type?:"string", $use[1],$this->reflect_object->getNamespaceName());
+            $TypeModel->setTypeName($type ?: "string", $use[1], $this->reflect_object->getNamespaceName());
             $AttributeModelObject->setType($TypeModel);
 
             $AttributeModelObject->setComment((string)$comment);
@@ -148,6 +148,9 @@ final class ClassPaser extends Template
      */
     public function getMethodModel(): array
     {
+        if ($this->MethodModel) {
+            return $this->MethodModel;
+        }
         //初始化数据
         if (!$this->attributeModel && !$this->methods) {
             $this->getAttributeModel();

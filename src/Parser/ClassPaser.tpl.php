@@ -6,7 +6,7 @@ use xltxlm\scrutinizer\Tests\TestUsed; ?>
 属性|类型| 说明|读取|写入| 单元测试
 ---:|---:|---:|---:|---:|---
 <?php foreach ($this->getAttributeModel() as $attributeModel){?>
-<?=$attributeModel->getName()?>|<?=$attributeModel->getType()?>|<?=$attributeModel->getComment()?>|<?=$attributeModel->isRead()?:'-'?>|<?=$attributeModel->isWrite()?:'-'?>|<?=TestUsed::testMthods($this->getClassName(),$attributeModel->isRead())?>
+<?=$attributeModel->getName()?>|<?=$attributeModel->getType()?>|<?=$attributeModel->getComment()?>|<?=$attributeModel->isRead()?:'-'?>|<?=$attributeModel->isWrite()?:'-'?>|<?=TestUsed::testMthods($this->getClassName(),$attributeModel->isRead())?><br><?=TestUsed::testMthods($this->getClassName(),$attributeModel->isWrite())?>
 
 <?php }?>
 
@@ -15,7 +15,8 @@ use xltxlm\scrutinizer\Tests\TestUsed; ?>
 方法| 说明|参数|返回值| 单元测试
 ---:|---:|---:|---:|---
 <?php foreach ($this->getMethodModel() as $methodModel){?>
-<?=$methodModel->getName()?>|<?=$methodModel->getComment()?>|<?=join("<br>",$methodModel->getParameters())?:'-'?>|<?=$methodModel->getType()?:'-'?>|[xxxTest:test1()](..)<br>[xxxTest:test3()](...)
+<?=$methodModel->getName()?>|<?=$methodModel->getComment()?>|<?=join("<br>",$methodModel->getParameters())?:'-'?>|<?=$methodModel->getType()?:'-'?>|<?=TestUsed::testMthods($this->getClassName(),$methodModel->getName())?>
+
 <?php }?>
 
 <?php }?>
