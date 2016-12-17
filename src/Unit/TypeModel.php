@@ -107,10 +107,11 @@ final class TypeModel
     public function __toString(): string
     {
         if ($this->typeName && $this->className) {
+            $mksource = '[$' . $this->typeName . " : $this->className]($this->className)";
             if ($this->isarray) {
-                return '$' . $this->typeName . " : {$this->className}[]";
+                return "{$mksource}[]";
             } else {
-                return '$' . $this->typeName . " : $this->className";
+                return $mksource;
             }
         } elseif ($this->typeName) {
             return $this->typeName;

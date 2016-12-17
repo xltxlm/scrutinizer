@@ -30,17 +30,22 @@ foreach ($RecursiveDirectoryIterator as $item) {
         //只处理php文件
         if ($item->getExtension() == 'php') {
             $dir = strtr($item->getPath(), [$src => ""]);
-            mkdir($scrutinizer . $dir);
+            $dir = $scrutinizer . $dir;
+            mkdir($dir);
             //如果符合psr-4的命名规则才生成文档
+            $filePath = $item->getPathname();
             $ClassNameFromFile = (new ClassNameFromFile())
-                ->setFilePath($item->getPathname())
+                ->setFilePath($filePath)
                 ->getClassName();
             //符合规范,生成文档
             if ($ClassNameFromFile) {
+                $markdown = $dir . DIRECTORY_SEPARATOR . $item->getBasename(".php") . '.MD';
+                $source = $dir . DIRECTORY_SEPARATOR . $item->getBasename(".php") . '.source.MD';
                 $ClassPaser = (new ClassPaser)
                     ->setClassName($ClassNameFromFile)
-                    ->setSaveToFileName($scrutinizer . $dir . DIRECTORY_SEPARATOR . $item->getBasename(".php") . '.MD')
+                    ->setSaveToFileName($markdown)
                     ->__invoke();
+                file_put_contents($source, "##$filePath\n\n```php\n" . file_get_contents($filePath) . "\n```");
             }
         }
     }
