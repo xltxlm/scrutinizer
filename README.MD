@@ -2,3 +2,6 @@
 vendor\scrutinizer
 #用法
 
+```php
+(new )
+```

@@ -19,6 +19,7 @@ final class AttributeModel
     protected $name = "";
     /** @var TypeModel 类型 */
     protected $type = "";
+
     protected $comment = "";
     protected $read = "";
     protected $write = "";

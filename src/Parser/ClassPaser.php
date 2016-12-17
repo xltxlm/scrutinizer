@@ -22,6 +22,8 @@ final class ClassPaser extends Template
 {
     /** @var string 模板的文件路径 */
     protected $file = __DIR__ . '/ClassPaser.tpl.php';
+    /** @var string 文件存储的相对路径 */
+    protected $relativeDir = "";
 
     /** @var \ReflectionMethod[] 类分析出来的公开方法 */
     private $methods = [];
@@ -34,6 +36,25 @@ final class ClassPaser extends Template
     private $MethodModel = [];
     /** @var  \ReflectionClass 反射对象 */
     private $reflect_object;
+
+    /**
+     * @return string
+     */
+    public function getRelativeDir(): string
+    {
+        return $this->relativeDir;
+    }
+
+    /**
+     * @param string $relativeDir
+     * @return ClassPaser
+     */
+    public function setRelativeDir(string $relativeDir): ClassPaser
+    {
+        $this->relativeDir = $relativeDir;
+        return $this;
+    }
+
 
     /**
      * @return \ReflectionClass
@@ -125,7 +146,8 @@ final class ClassPaser extends Template
             //解析当前属性的数字, 分拆成 类型+解释
             preg_match("#@var\s+([^\s]+)\s+(.*)\*/#i", $comment, $out);
             $comment = $out[2];
-            $TypeModel = (new TypeModel);
+            $TypeModel = (new TypeModel)
+                ->setRelativeDir($this->getRelativeDir());
             //属性类型为注释的第2个参数
             $type = $out[1];
             $isArray = (bool)strpos($type, '[]');
@@ -140,7 +162,19 @@ final class ClassPaser extends Template
             $AttributeModelObject->setComment((string)$comment);
             $this->attributeModel[] = $AttributeModelObject;
         }
+        uasort($this->attributeModel, [$this, 'sortAttributeModel']);
         return $this->attributeModel;
+    }
+
+    /**
+     * 按照 可设置 - 只读取 排序
+     * @param AttributeModel $a
+     * @param AttributeModel $b
+     * @return int
+     */
+    private function sortAttributeModel(AttributeModel $a, AttributeModel $b)
+    {
+        return strlen($b->isWrite()) <=> strlen($a->isWrite());
     }
 
     /**
@@ -166,8 +200,9 @@ final class ClassPaser extends Template
             foreach ($item->getParameters() as $parameter) {
                 $typeName = $parameter->getName();
                 $TypeModel = (new TypeModel())
-                    ->setTypeName($typeName)
-                    ->setClassName((string)$parameter->getType());
+                    ->setRelativeDir($this->getRelativeDir())
+                    ->setParamName($typeName)
+                    ->setTypeName((string)$parameter->getType());
                 if ($typeName == 'array') {
                     $TypeModel->setIsarray(true);
                 }
@@ -175,7 +210,7 @@ final class ClassPaser extends Template
             }
             $MethodModel->setParameters($typeNames);
             $MethodModel->setComment(trim($comments[1], "* "));
-            $MethodModel->setType((string)$item->getReturnType());
+            $MethodModel->setReturnType((string)$item->getReturnType());
             $this->MethodModel[] = $MethodModel;
         }
         return $this->MethodModel;

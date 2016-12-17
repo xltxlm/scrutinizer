@@ -44,7 +44,7 @@ class TestUsed
     {
         self::$dir = $dir;
         //只分析一次
-        if (self::$relation) {
+        if (!empty(self::$relation)) {
             return self::$relation;
         }
 
@@ -65,7 +65,7 @@ class TestUsed
 
                         $ReflectionClass = (new \ReflectionClass($ClassNameFromFile));
                         foreach ($ReflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $reflectionMethod) {
-                            $functionName = $reflectionMethod->getName();
+                            $functionName = $reflectionMethod->name;
                             if (strpos($functionName, 'test') !== false) {
                                 foreach ($use[1] as $useitem) {
                                     self::$relation[$useitem][$ClassNameFromFile][$functionName] = self::getLines(

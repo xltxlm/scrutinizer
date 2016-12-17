@@ -8,18 +8,64 @@
 
 namespace xltxlm\scrutinizer\Unit;
 
+use xltxlm\helper\Hclass\FilePathFromClass;
+
 /**
  * 属性类型
  * Class TypeModel.
  */
 final class TypeModel
 {
+    /** @var string 参数名称 */
+    protected $paramName = '';
     /** @var string 类型名称 */
     protected $typeName = '';
     /** @var string 如果是类,存在类名称 */
     protected $className = '';
     /** @var bool 是否为数组类型 */
     protected $isarray = false;
+    /** @var string 文件存储的相对路径 */
+    protected $relativeDir = '';
+
+    /**
+     * @return string
+     */
+    public function getParamName(): string
+    {
+        return $this->paramName;
+    }
+
+    /**
+     * @param string $paramName
+     *
+     * @return TypeModel
+     */
+    public function setParamName(string $paramName): TypeModel
+    {
+        $this->paramName = $paramName;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRelativeDir(): string
+    {
+        return $this->relativeDir;
+    }
+
+    /**
+     * @param string $relativeDir
+     *
+     * @return TypeModel
+     */
+    public function setRelativeDir(string $relativeDir): TypeModel
+    {
+        $this->relativeDir = $relativeDir;
+
+        return $this;
+    }
 
     /**
      * @return string
@@ -36,26 +82,26 @@ final class TypeModel
      *
      * @return TypeModel
      */
-    public function setTypeName(string $typeName, array $use = [], string $nameSpace = ""): TypeModel
+    public function setTypeName(string $typeName, array $use = [], string $nameSpace = ''): TypeModel
     {
-        $type = [
-            'string',
-            'int',
-            'float',
-            'array',
-            'bool',
-        ];
+        $types = ['string', 'int', 'float', 'array', 'bool'];
         $this->typeName = $typeName;
-        if (!in_array($typeName, $type)) {
+        if (!in_array($typeName, $types)) {
             foreach ($use as $item) {
                 $items = explode('\\', $item);
                 $className = array_pop($items);
                 if ($className == $typeName) {
-                    $this->setClassName('\\' . $item);
+                    $this->setClassName('\\'.$item);
                     break;
                 }
             }
-            $this->setClassName($nameSpace . '\\' . $typeName);
+            if (!$this->getClassName()) {
+                if (strpos($typeName, '\\') !== false) {
+                    $this->setClassName($typeName);
+                } else {
+                    $this->setClassName($nameSpace.'\\'.$typeName);
+                }
+            }
         }
 
         return $this;
@@ -102,20 +148,26 @@ final class TypeModel
     }
 
     /**
+     * 引用的类格式化成markdown相对路径格式.
+     *
      * @return string
      */
     public function __toString(): string
     {
         if ($this->typeName && $this->className) {
-            $mksource = '[$' . $this->typeName . " : $this->className]($this->className)";
+            $baseName = (new FilePathFromClass($this->className))
+                ->getBaseName();
+            $markdown = strtr(".$this->relativeDir/$baseName.source.MD", ['\\' => '/']);
+            $mksource = '[$'.$this->typeName." : $baseName]($markdown)";
             if ($this->isarray) {
                 return "{$mksource}[]";
             } else {
                 return $mksource;
             }
         } elseif ($this->typeName) {
-            return $this->typeName;
+            return $this->paramName ? "\${$this->paramName}($this->typeName)" : $this->typeName;
         }
-        return "-";
+
+        return '-';
     }
 }

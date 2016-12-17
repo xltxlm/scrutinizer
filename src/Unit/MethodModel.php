@@ -18,7 +18,7 @@ final class MethodModel
     /** @var string 属性的名称 */
     protected $name = "";
     /** @var string 类型 */
-    protected $type = "";
+    protected $returnType = "";
     /** @var TypeModel[] 参数类型 */
     protected $parameters = [];
     /** @var string 注释说明 */
@@ -64,18 +64,18 @@ final class MethodModel
     /**
      * @return string
      */
-    public function getType(): string
+    public function getReturnType(): string
     {
-        return $this->type;
+        return $this->returnType;
     }
 
     /**
-     * @param string $type
+     * @param string $returnType
      * @return MethodModel
      */
-    public function setType(string $type): MethodModel
+    public function setReturnType(string $returnType): MethodModel
     {
-        $this->type = $type;
+        $this->returnType = $returnType;
         return $this;
     }
 
