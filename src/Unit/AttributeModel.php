@@ -8,6 +8,9 @@
 
 namespace xltxlm\scrutinizer\Unit;
 
+use xltxlm\scrutinizer\Parser\ClassPaser;
+use xltxlm\scrutinizer\Tests\TestUsed;
+
 /**
  * 属性的模型
  * Class MethodModel
@@ -23,7 +26,29 @@ final class AttributeModel
     protected $comment = "";
     protected $read = "";
     protected $write = "";
-    protected $tests = [];
+    /** @var string 该属性关联的方法是否被单元测试了 */
+    protected $testsString = "";
+    /** @var  ClassPaser 属性所属的类 */
+    protected $ClassPaser;
+
+    /**
+     * @return ClassPaser
+     */
+    private function getClassPaser(): ClassPaser
+    {
+        return $this->ClassPaser;
+    }
+
+    /**
+     * @param ClassPaser $ClassPaser
+     * @return AttributeModel
+     */
+    public function setClassPaser(ClassPaser $ClassPaser): AttributeModel
+    {
+        $this->ClassPaser = $ClassPaser;
+        return $this;
+    }
+
 
     /**
      * @return string
@@ -66,7 +91,7 @@ final class AttributeModel
      */
     public function getComment(): string
     {
-        return $this->comment?:'-';
+        return $this->comment ?: '-';
     }
 
     /**
@@ -116,20 +141,15 @@ final class AttributeModel
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function getTests(): array
+    public function getTestsString(): string
     {
-        return $this->tests;
-    }
-
-    /**
-     * @param array $tests
-     * @return AttributeModel
-     */
-    public function setTests(array $tests): AttributeModel
-    {
-        $this->tests = $tests;
-        return $this;
+        $this->testsString = TestUsed::testMthods($this->getClassPaser()->getClassName(), $this->isRead()) . '<br>' .
+            TestUsed::testMthods($this->getClassPaser()->getClassName(), $this->isWrite());
+        if ($this->testsString <> '<br>') {
+            $this->getClassPaser()->setTests(true);
+        }
+        return $this->testsString;
     }
 }

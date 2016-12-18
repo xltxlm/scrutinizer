@@ -1,6 +1,6 @@
 {
   "name": "xltxlm/scrutinizer",
-  "description": "生成质量文档",
+  "description": "生成代码文档，用于交流，检查代码质量",
   "authors": [
     {
       "name": "xltxlm",
@@ -11,6 +11,10 @@
     "php": ">=7.0",
     "xltxlm/helper": "*"
   },
+  "bin": [
+    "src/scrutinizer",
+    "src/docker-prepare.cmd"
+  ],
   "require-dev": {
     "phpunit/phpunit": "*",
     "squizlabs/php_codesniffer": "*",

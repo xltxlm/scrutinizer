@@ -12,8 +12,8 @@ use xltxlm\helper\Hclass\FilePathFromClass;
 use xltxlm\scrutinizer\Parser\ClassPaser;
 use xltxlm\scrutinizer\Tests\TestUsed;
 
-include_once __DIR__.'/../../autoload.php';
-include_once __DIR__.'/../vendor/autoload.php';
+eval('include_once __DIR__."/../../../autoload.php";');
+eval('include_once __DIR__."/../vendor/autoload.php";');
 
 $root = (new FilePathFromClass(ClassLoader::class))
     ->setDirDepth(3)
@@ -32,7 +32,7 @@ foreach ($RecursiveDirectoryIterator as $item) {
         continue;
     }
     $pathName = strtr($item->getFileInfo(), [$src => '']);
-    echo(str_repeat("\t+ ", $RecursiveDirectoryIterator->getDepth()) ?: '+ ').'['.$pathName.']';
+    echo(str_repeat("\t+ ", $RecursiveDirectoryIterator->getDepth()) ?: '+ ').'['.$pathName;
     if ($item->isFile()) {
         //只处理php文件
         if ($item->getExtension() == 'php') {
@@ -47,29 +47,39 @@ foreach ($RecursiveDirectoryIterator as $item) {
             //符合规范,生成文档
             if ($ClassNameFromFile) {
                 $markdown = $dir.DIRECTORY_SEPARATOR.$item->getBasename('.php').'.MD';
-                $source = $dir.DIRECTORY_SEPARATOR.$item->getBasename('.php').'.source.MD';
-                $ClassPaser = (new ClassPaser())
+                $source = $dir.DIRECTORY_SEPARATOR.$item->getBasename().'.MD';
+                $ClassPaserObject = (new ClassPaser())
                     ->setClassName($ClassNameFromFile)
-                    ->setSaveToFileName($markdown)
-                    ->setRelativeDir($relativeDir)
+                    ->setSaveToFileName($markdown);
+                $ClassPaserObject
                     ->__invoke();
+                //拷贝源代码
                 file_put_contents($source, "##$filePath\n\n```php\n".file_get_contents($filePath)."\n```");
+                //生成目录的树桩链接
+                $test = '';
+                if ($ClassPaserObject->isTests()) {
+                    $test = '**有单元测试**';
+                }
                 $link = strtr("$relativeDir/".$item->getBasename('.php').'.MD', ['\\' => '/']);
-                echo "($link)";
+                echo "$test]($link)";
             }
         }
     }
-    echo "\n";
+    echo "]\n";
 }
+//生成电子书的结构
 file_put_contents(
     $scrutinizer.DIRECTORY_SEPARATOR.'README.md',
     "```json\n".file_get_contents($root.'/composer.json').'```'
 );
 file_put_contents($scrutinizer.DIRECTORY_SEPARATOR.'SUMMARY.md', ob_get_clean());
 
+//页面样式改宽度
 $styles = $scrutinizer.DIRECTORY_SEPARATOR.'styles';
 mkdir($styles);
 $style = <<<'EOF'
 .page-inner{padding:20px 15px 40px 15px;max-width:none;} .book-summary ul.summary li >a{text-decoration:underline}
 EOF;
 file_put_contents($styles.DIRECTORY_SEPARATOR.'website.css', $style);
+
+echo shell_exec("docker run -i --rm  -v $root/scrutinizer:/gitbook docker-gitbook bash -c \"gitbook build\"");

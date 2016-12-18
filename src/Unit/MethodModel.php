@@ -8,6 +8,9 @@
 
 namespace xltxlm\scrutinizer\Unit;
 
+use xltxlm\scrutinizer\Parser\ClassPaser;
+use xltxlm\scrutinizer\Tests\TestUsed;
+
 /**
  * 方法属性
  * Class MethodModel
@@ -23,7 +26,28 @@ final class MethodModel
     protected $parameters = [];
     /** @var string 注释说明 */
     protected $comment = "";
-    protected $tests = [];
+    /** @var string 测试案例的markdown */
+    protected $testsString = "";
+    /** @var  ClassPaser */
+    protected $ClassPaser;
+
+    /**
+     * @param ClassPaser $ClassPaser
+     * @return MethodModel
+     */
+    public function setClassPaser(ClassPaser &$ClassPaser): MethodModel
+    {
+        $this->ClassPaser = &$ClassPaser;
+        return $this;
+    }
+
+    /**
+     * @return ClassPaser
+     */
+    public function getClassPaser(): ClassPaser
+    {
+        return $this->ClassPaser;
+    }
 
     /**
      * @return TypeModel[]
@@ -98,20 +122,14 @@ final class MethodModel
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function getTests(): array
+    public function getTestsString(): string
     {
-        return $this->tests;
-    }
-
-    /**
-     * @param array $tests
-     * @return MethodModel
-     */
-    public function setTests(array $tests): MethodModel
-    {
-        $this->tests = $tests;
-        return $this;
+        $this->testsString = TestUsed::testMthods($this->getClassPaser()->getClassName(), $this->getName());
+        if ($this->testsString) {
+            $this->getClassPaser()->setTests(true);
+        }
+        return $this->testsString;
     }
 }

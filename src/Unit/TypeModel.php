@@ -9,6 +9,7 @@
 namespace xltxlm\scrutinizer\Unit;
 
 use xltxlm\helper\Hclass\FilePathFromClass;
+use xltxlm\scrutinizer\Parser\ClassPaser;
 
 /**
  * 属性类型
@@ -24,8 +25,28 @@ final class TypeModel
     protected $className = '';
     /** @var bool 是否为数组类型 */
     protected $isarray = false;
-    /** @var string 文件存储的相对路径 */
-    protected $relativeDir = '';
+
+    /** @var  ClassPaser 属性所属的类 */
+    protected $ClassPaser;
+
+    /**
+     * @return ClassPaser
+     */
+    private function getClassPaser(): ClassPaser
+    {
+        return $this->ClassPaser;
+    }
+
+    /**
+     * @param ClassPaser $ClassPaser
+     * @return TypeModel
+     */
+    public function setClassPaser(ClassPaser &$ClassPaser): TypeModel
+    {
+        $this->ClassPaser = &$ClassPaser;
+        return $this;
+    }
+
 
     /**
      * @return string
@@ -43,26 +64,6 @@ final class TypeModel
     public function setParamName(string $paramName): TypeModel
     {
         $this->paramName = $paramName;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRelativeDir(): string
-    {
-        return $this->relativeDir;
-    }
-
-    /**
-     * @param string $relativeDir
-     *
-     * @return TypeModel
-     */
-    public function setRelativeDir(string $relativeDir): TypeModel
-    {
-        $this->relativeDir = $relativeDir;
 
         return $this;
     }
@@ -91,7 +92,7 @@ final class TypeModel
                 $items = explode('\\', $item);
                 $className = array_pop($items);
                 if ($className == $typeName) {
-                    $this->setClassName('\\'.$item);
+                    $this->setClassName('\\' . $item);
                     break;
                 }
             }
@@ -99,7 +100,7 @@ final class TypeModel
                 if (strpos($typeName, '\\') !== false) {
                     $this->setClassName($typeName);
                 } else {
-                    $this->setClassName($nameSpace.'\\'.$typeName);
+                    $this->setClassName($nameSpace . '\\' . $typeName);
                 }
             }
         }
@@ -157,8 +158,13 @@ final class TypeModel
         if ($this->typeName && $this->className) {
             $baseName = (new FilePathFromClass($this->className))
                 ->getBaseName();
-            $markdown = strtr(".$this->relativeDir/$baseName.source.MD", ['\\' => '/']);
-            $mksource = '[$'.$this->typeName." : $baseName]($markdown)";
+            //获取源代码的相对路径
+            $RelativePath=(new RelativePath())
+                ->setFirstClassName($this->getClassPaser()->getClassName())
+                ->setSecondClassName($this->className)
+                ->__invoke();
+            $markdown = strtr("$RelativePath.MD", ['\\' => '/']);
+            $mksource = '[$' . $this->typeName . " : $baseName]($markdown)";
             if ($this->isarray) {
                 return "{$mksource}[]";
             } else {

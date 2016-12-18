@@ -39,6 +39,7 @@ class TestUsed
 
     /**
      * @param string $dir
+     * @return array
      */
     public static function setDir(string $dir)
     {
@@ -101,7 +102,8 @@ class TestUsed
         foreach (self::$relation[$className] as $ClassNameFromFile => $functionNames) {
             foreach ($functionNames as $functionName => $code) {
                 if (strpos($code, "->$method(") !== false) {
-                    $testrelation[] = "$ClassNameFromFile:$functionName()";
+                    $ReflectionClass = (new \ReflectionClass($ClassNameFromFile));
+                    $testrelation[] = $ReflectionClass->getShortName() . ":$functionName()";
                 }
             }
         }

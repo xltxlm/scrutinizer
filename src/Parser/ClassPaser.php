@@ -20,11 +20,6 @@ use xltxlm\scrutinizer\Unit\TypeModel;
  */
 final class ClassPaser extends Template
 {
-    /** @var string 模板的文件路径 */
-    protected $file = __DIR__ . '/ClassPaser.tpl.php';
-    /** @var string 文件存储的相对路径 */
-    protected $relativeDir = "";
-
     /** @var \ReflectionMethod[] 类分析出来的公开方法 */
     private $methods = [];
     /** @var string 类的名称 */
@@ -36,25 +31,24 @@ final class ClassPaser extends Template
     private $MethodModel = [];
     /** @var  \ReflectionClass 反射对象 */
     private $reflect_object;
+    /** @var bool 是否有单元测试案例 */
+    protected $tests = false;
 
     /**
-     * @return string
+     * @param bool $tests
      */
-    public function getRelativeDir(): string
+    public function setTests(bool $tests)
     {
-        return $this->relativeDir;
+        $this->tests = $tests;
     }
 
     /**
-     * @param string $relativeDir
-     * @return ClassPaser
+     * @return bool
      */
-    public function setRelativeDir(string $relativeDir): ClassPaser
+    public function isTests(): bool
     {
-        $this->relativeDir = $relativeDir;
-        return $this;
+        return $this->tests;
     }
-
 
     /**
      * @return \ReflectionClass
@@ -134,7 +128,8 @@ final class ClassPaser extends Template
                 unset($this->methods[strtolower($writePower->getName())]);
             }
 
-            $AttributeModelObject = (new AttributeModel);
+            $AttributeModelObject = (new AttributeModel)
+                ->setClassPaser($this);
             $AttributeModelObject->setName($name);
             if ($readPower) {
                 $AttributeModelObject->setRead($readPower->getName());
@@ -147,7 +142,7 @@ final class ClassPaser extends Template
             preg_match("#@var\s+([^\s]+)\s+(.*)\*/#i", $comment, $out);
             $comment = $out[2];
             $TypeModel = (new TypeModel)
-                ->setRelativeDir($this->getRelativeDir());
+                ->setClassPaser($this);
             //属性类型为注释的第2个参数
             $type = $out[1];
             $isArray = (bool)strpos($type, '[]');
@@ -190,7 +185,8 @@ final class ClassPaser extends Template
             $this->getAttributeModel();
         }
         foreach ($this->methods as $item) {
-            $MethodModel = (new MethodModel());
+            $MethodModel = (new MethodModel())
+                ->setClassPaser($this);
             $MethodModel->setName($item->getName());
             $comment = $item->getDocComment();
 
@@ -200,7 +196,7 @@ final class ClassPaser extends Template
             foreach ($item->getParameters() as $parameter) {
                 $typeName = $parameter->getName();
                 $TypeModel = (new TypeModel())
-                    ->setRelativeDir($this->getRelativeDir())
+                    ->setClassPaser($this)
                     ->setParamName($typeName)
                     ->setTypeName((string)$parameter->getType());
                 if ($typeName == 'array') {
