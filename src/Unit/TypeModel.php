@@ -26,7 +26,7 @@ final class TypeModel
     /** @var bool 是否为数组类型 */
     protected $isarray = false;
 
-    /** @var  ClassPaser 属性所属的类 */
+    /** @var ClassPaser 属性所属的类 */
     protected $ClassPaser;
 
     /**
@@ -39,14 +39,15 @@ final class TypeModel
 
     /**
      * @param ClassPaser $ClassPaser
+     *
      * @return TypeModel
      */
     public function setClassPaser(ClassPaser &$ClassPaser): TypeModel
     {
         $this->ClassPaser = &$ClassPaser;
+
         return $this;
     }
-
 
     /**
      * @return string
@@ -85,14 +86,14 @@ final class TypeModel
      */
     public function setTypeName(string $typeName, array $use = [], string $nameSpace = ''): TypeModel
     {
-        $types = ['string', 'int', 'float', 'array', 'bool'];
+        $types = ['string', 'int', 'float', 'array', 'bool', 'callable'];
         $this->typeName = $typeName;
         if (!in_array($typeName, $types) && strpos($typeName, '|') === false) {
             foreach ($use as $item) {
                 $items = explode('\\', $item);
                 $className = array_pop($items);
                 if ($className == $typeName) {
-                    $this->setClassName('\\' . $item);
+                    $this->setClassName('\\'.$item);
                     break;
                 }
             }
@@ -100,7 +101,7 @@ final class TypeModel
                 if (strpos($typeName, '\\') !== false) {
                     $this->setClassName($typeName);
                 } else {
-                    $this->setClassName($nameSpace . '\\' . $typeName);
+                    $this->setClassName($nameSpace.'\\'.$typeName);
                 }
             }
         }
@@ -164,7 +165,7 @@ final class TypeModel
                 ->setSecondClassName($this->className)
                 ->__invoke();
             $markdown = strtr("$RelativePath.MD", ['\\' => '/']);
-            $mksource = '[$' . $this->typeName . " : $baseName]($markdown)";
+            $mksource = '[$'.$this->typeName." : $baseName]($markdown)";
             if ($this->isarray) {
                 return "{$mksource}[]";
             } else {

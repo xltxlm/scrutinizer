@@ -32,7 +32,7 @@ foreach ($RecursiveDirectoryIterator as $item) {
         continue;
     }
     $pathName = strtr($item->getFileInfo(), [$src => '']);
-    echo(str_repeat("\t+ ", $RecursiveDirectoryIterator->getDepth()) ?: '+ ').'['.$pathName;
+    echo(str_repeat("\t", $RecursiveDirectoryIterator->getDepth()) ?: '').'+ ['.$pathName;
     if ($item->isFile()) {
         //只处理php文件
         if ($item->getExtension() == 'php') {
