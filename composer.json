@@ -12,8 +12,7 @@
     "xltxlm/helper": "*"
   },
   "bin": [
-    "src/scrutinizer",
-    "src/docker-prepare.cmd"
+    "src/scrutinizer"
   ],
   "require-dev": {
     "phpunit/phpunit": "*",

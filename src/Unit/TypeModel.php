@@ -87,7 +87,7 @@ final class TypeModel
     {
         $types = ['string', 'int', 'float', 'array', 'bool'];
         $this->typeName = $typeName;
-        if (!in_array($typeName, $types)) {
+        if (!in_array($typeName, $types) && strpos($typeName, '|') === false) {
             foreach ($use as $item) {
                 $items = explode('\\', $item);
                 $className = array_pop($items);
@@ -159,7 +159,7 @@ final class TypeModel
             $baseName = (new FilePathFromClass($this->className))
                 ->getBaseName();
             //获取源代码的相对路径
-            $RelativePath=(new RelativePath())
+            $RelativePath = (new RelativePath())
                 ->setFirstClassName($this->getClassPaser()->getClassName())
                 ->setSecondClassName($this->className)
                 ->__invoke();
